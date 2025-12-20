@@ -3,6 +3,7 @@ fastapi
 sqlalchemy
 psycopg2-binary
 pydantic
+pydantic[email]
 python-jose[cryptography]
 python-multipart
 

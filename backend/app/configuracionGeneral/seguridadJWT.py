@@ -33,7 +33,7 @@ def verificarToken(token: str) -> dict:
     return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
 
-oauth2Scheme = OAuth2PasswordBearer(tokenUrl="/usuarios/loginSwagger")
+oauth2Scheme = OAuth2PasswordBearer(tokenUrl="/usuarios/loginSwagger",auto_error=False)
 
 
 

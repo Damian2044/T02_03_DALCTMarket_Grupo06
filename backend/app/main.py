@@ -3,10 +3,14 @@ from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.requests import Request
 from app.configuracionGeneral.seguridadJWT import protegerRuta
+from app.database import Base,engine,obtenerSesionDirecta
 
-
-# Libreria de Usuarios
+# Librerias de rutas
 from app.Usuarios.controllers.usuarioController import router as controladorUsuarios
+from app.Usuarios.controllers.usuarioController import publicRouter as controladorUsuariosPublic
+from app.Usuarios.repositories.usuarioRepository import UsuarioRepository
+from app.Usuarios.controllers.rolController import router as controladorRoles
+from app.Usuarios.repositories.rolRepository import RolRepository
 
 
 app = FastAPI(
@@ -15,6 +19,16 @@ app = FastAPI(
     version="0.1",
 )
 
+@app.on_event("startup")
+async def startup_event():
+    print("Iniciando API DALCT Market...")
+    print("Conectando a la base de datos...")
+    Base.metadata.create_all(bind=engine)
+    print("Base de datos conectada...")
+    #Crear datos por defecto
+    RolRepository(obtenerSesionDirecta()).crearRolesPorDefecto()
+    UsuarioRepository(obtenerSesionDirecta()).crearUsuariosIniciales()
+
 @app.get("/")
 def inicio(usuarioActual=Depends(protegerRuta("Prueba", "ALL"))):
     print(usuarioActual)
@@ -22,7 +36,9 @@ def inicio(usuarioActual=Depends(protegerRuta("Prueba", "ALL"))):
 
 
 # Registrar rutas
+app.include_router(controladorUsuariosPublic,prefix="/usuarios", tags=["Usuarios"])
 app.include_router(controladorUsuarios,prefix="/usuarios", tags=["Usuarios"])
+app.include_router(controladorRoles,prefix="/roles", tags=["Roles"])
 
 
 
