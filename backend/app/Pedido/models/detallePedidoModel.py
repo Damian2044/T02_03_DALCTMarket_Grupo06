@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, Float, DateTime, String, ForeignKey
 from sqlalchemy.orm import relationship
 from app.database import Base
+from sqlalchemy.sql import func
 
 class DetallePedido(Base):
     __tablename__ = "detallepedido"
@@ -11,7 +12,7 @@ class DetallePedido(Base):
     cantidadSolicitada = Column(Integer, nullable=False)
     precioUnitarioCompra = Column(Float, nullable=False)
     estadoDetalle = Column(String(30), nullable=False)
-    fechaRecepcion = Column(DateTime, nullable=True)
+    fechaRecepcion = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
 
     pedido = relationship("Pedido", back_populates="detalles")
     producto = relationship("Producto", back_populates="detallesPedido")

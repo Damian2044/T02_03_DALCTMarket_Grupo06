@@ -1,7 +1,7 @@
 from app.Venta.models.promocionModel import Promocion
 from app.Productos.models.productoModel import Producto
 from sqlalchemy.orm import joinedload
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta,time
 
 class PromocionRepository:
     def __init__(self, dbSession):
@@ -22,9 +22,14 @@ class PromocionRepository:
             return {"error": "producto_inactivo"}
         # Las fechas ya fueron validadas en el schema; construir datetimes con horas apropiadas
         quitoTZ = timezone(timedelta(hours=-5))
-        now = datetime.now(quitoTZ)
-        fecha_inicio = datetime.combine(promocionCrear.fechaInicioPromocion, now.time()).astimezone(quitoTZ)
-        fecha_fin = datetime.combine(promocionCrear.fechaFinPromocion, datetime.max.time()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(quitoTZ)
+  
+        #fecha_inicio = datetime.combine(promocionCrear.fechaInicioPromocion, now.time()).astimezone(quitoTZ)
+        #fecha_fin = datetime.combine(promocionCrear.fechaFinPromocion, datetime.max.time()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(quitoTZ)
+        hora_actual = datetime.now(quitoTZ).time()
+        fecha_inicio = datetime.combine(promocionCrear.fechaInicioPromocion,hora_actual,tzinfo=quitoTZ)
+        fecha_fin = datetime.combine(promocionCrear.fechaFinPromocion,time(23,59,59,microsecond=0),tzinfo=quitoTZ)
+
+        print(quitoTZ, hora_actual, fecha_inicio, fecha_fin)
         nuevo = Promocion(
             idProducto=promocionCrear.idProducto,
             nombrePromocion=promocionCrear.nombrePromocion,
@@ -81,8 +86,11 @@ class PromocionRepository:
         # Promoción pasada
         inicio_pasado = hoy - timedelta(days=60)
         fin_pasado = hoy - timedelta(days=30)
-        fecha_inicio_pasado = datetime.combine(inicio_pasado, datetime.now(quitoTZ).time()).astimezone(quitoTZ)
-        fecha_fin_pasado = datetime.combine(fin_pasado, datetime.max.time()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(quitoTZ)
+        hora_actual = datetime.now(quitoTZ).time()
+
+        fecha_inicio_pasado = datetime.combine(inicio_pasado, hora_actual, tzinfo=quitoTZ)
+        fecha_fin_pasado = datetime.combine(fin_pasado,time(23,59,59,microsecond=0),tzinfo=quitoTZ)
+        
         promo_pasada = Promocion(
             idProducto=producto1.idProducto,
             nombrePromocion="Promoción Pasada",
@@ -95,8 +103,8 @@ class PromocionRepository:
         # Promoción vigente (hoy -> +30 días)
         inicio_act = hoy
         fin_act = hoy + timedelta(days=30)
-        fecha_inicio_act = datetime.combine(inicio_act, datetime.now(quitoTZ).time()).astimezone(quitoTZ)
-        fecha_fin_act = datetime.combine(fin_act, datetime.max.time()).replace(hour=23, minute=59, second=59, microsecond=0).astimezone(quitoTZ)
+        fecha_inicio_act = datetime.combine(inicio_act, hora_actual, tzinfo=quitoTZ)
+        fecha_fin_act = datetime.combine(fin_act, time(23,59,59,microsecond=0), tzinfo=quitoTZ)
         promo_actual = Promocion(
             idProducto=producto2.idProducto,
             nombrePromocion="Promoción Actual",
