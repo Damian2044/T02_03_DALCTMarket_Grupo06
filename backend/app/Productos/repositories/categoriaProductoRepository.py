@@ -13,7 +13,7 @@ class CategoriaProductoRepository:
         return self.dbSession.query(CategoriaProducto).filter(CategoriaProducto.idCategoriaProducto == idCategoria).first()
 
     def validarNombreExistente(self, nombre: str, excluirId: int = None):
-        query = self.dbSession.query(CategoriaProducto).filter(CategoriaProducto.nombreCategoria == nombre)
+        query = self.dbSession.query(CategoriaProducto).filter(CategoriaProducto.nombreCategoria == nombre.lower())
         if excluirId is not None:
             query = query.filter(CategoriaProducto.idCategoriaProducto != excluirId)
         return query.first()
