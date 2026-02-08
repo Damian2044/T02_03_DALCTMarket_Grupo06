@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, File
+import os
+from fastapi.responses import JSONResponse
 from app.configuracionGeneral.schemasGenerales import respuestaApi
 from app.ParametrosSistema.services.parametroSistemaService import ParametroSistemaService
 from app.ParametrosSistema.schemas.parametroSistemaSchemas import *
@@ -6,6 +8,21 @@ from app.database import obtenerSesion
 from app.configuracionGeneral.seguridadJWT import protegerRuta
 
 router = APIRouter(dependencies=[Depends(protegerRuta("ParametrosSistema", "ALL"))])
+
+# Endpoint para subir imagen y crear carpeta si no existe (camelCase y español)
+@router.post("/subirLogo", tags=["ParametrosSistema"], summary="Subir logo del negocio", status_code=200)
+async def subirLogoNegocio(archivoLogo: UploadFile = File(...)):
+    carpetaImagenes = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "imagenes")
+    if not os.path.exists(carpetaImagenes):
+        os.makedirs(carpetaImagenes)
+    extensionLogo = os.path.splitext(archivoLogo.filename)[1]
+    nombreFinalLogo = f"nuevo_logo{extensionLogo}"
+    rutaLogo = os.path.join(carpetaImagenes, nombreFinalLogo)
+    print("rutaLogo", rutaLogo)
+    with open(rutaLogo, "wb") as archivoDestino:
+        contenidoLogo = await archivoLogo.read()
+        archivoDestino.write(contenidoLogo)
+    return JSONResponse(status_code=200, content={"success": True, "message": "logoSubidoCorrectamente", "data": {"rutaLogo": f"imagenes/{nombreFinalLogo}"}})
 
 @router.get("/", tags=["ParametrosSistema"], summary="Obtener todos los parámetros", status_code=200, response_model=respuestaApi)
 async def obtenerParametros(dbSession=Depends(obtenerSesion)):
