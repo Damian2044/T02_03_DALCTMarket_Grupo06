@@ -179,89 +179,25 @@ class VentaService:
         data = [VentaRespuestaSchema.from_orm(v) for v in ventas]
         return respuestaApi(success=True, message="Ventas encontradas", data=data)
 
-
-
     def anularVenta(self, idVenta: int, usuario: dict):
-        from datetime import datetime, timezone, timedelta
-
         rol = usuario.get("rol")
         idUsuario = usuario.get("idUsuario")
-
         venta = self.repo.obtenerPorId(idVenta)
         if not venta:
             raise HTTPException(status_code=404, detail="Venta no encontrada")
+        # Solo se permiten anulaciones de ventas del Admin
+        if rol != "Administrador":
+            raise HTTPException(status_code=403, detail="No tiene permisos para anular esta venta")
 
-        # =========================
-        # ADMINISTRADOR
-        # =========================
-        if rol == "Administrador":
-            pass  # no restricciones
-
-        # =========================
-        # CAJERO
-        # =========================
-        elif rol == "Cajero":
-            # 1. Solo ventas del día actual (Quito)
-            quitoTZ = timezone(timedelta(hours=-5))
-            try:
-                fechaVenta = venta.fechaVenta.astimezone(quitoTZ).date()
-            except Exception:
-                fechaVenta = venta.fechaVenta.date()
-
-            hoy = datetime.now(quitoTZ).date()
-            if fechaVenta != hoy:
-                raise HTTPException(
-                    status_code=400,
-                    detail="El Cajero solo puede anular ventas del día actual"
-                )
-
-            # 2. Debe ser su propia venta
-            if venta.idUsuarioVenta != idUsuario:
-                raise HTTPException(
-                    status_code=403,
-                    detail="No puede anular ventas de otro cajero"
-                )
-
-            # 3. La caja debe estar abierta hoy
-            cajasHoy = self.cajaRepo.listarCajasHoy(idUsuario, False)
-            cajaValida = any(
-                c.idCaja == venta.idCaja and c.estadoCaja == "ABIERTA"
-                for c in cajasHoy
-            )
-
-            if not cajaValida:
-                raise HTTPException(
-                    status_code=400,
-                    detail="La caja asociada a la venta no está abierta hoy"
-                )
-
-        # =========================
-        # OTROS ROLES
-        # =========================
-        else:
-            raise HTTPException(status_code=403, detail="Rol no autorizado")
-
-        # =========================
-        # ANULACIÓN
-        # =========================
         res = self.repo.anularVenta(idVenta)
-
+        if res is None:
+            raise HTTPException(status_code=404, detail="Venta no encontrada")
         if isinstance(res, dict) and res.get("error") == "venta_ya_anulada":
-            data = VentaRespuestaSchema.from_orm(res["venta"])
-            return respuestaApi(
-                success=False,
-                message="La venta ya está anulada",
-                data=data
-            )
-
+            data = VentaRespuestaSchema.from_orm(res.get("venta"))
+            return respuestaApi(success=False, message="La venta ya está anulada", data=data)
         data = VentaRespuestaSchema.from_orm(res)
         actor = identificarUsuarioString(usuario)
-
-        return respuestaApi(
-            success=True,
-            message=f"Venta anulada por {actor}",
-            data=data
-        )
+        return respuestaApi(success=True, message=f"Venta anulada por {actor}", data=data)
 
 
 
