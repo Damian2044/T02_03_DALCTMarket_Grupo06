@@ -44,7 +44,7 @@ permisos = {
     "ParametrosSistema": {"Administrador": ["ALL","GET","POST","PUT","DELETE"], "Bodeguero": ["GET"], "Cajero": ["GET"]},
     "Usuarios": {"Administrador": ["ALL","GET","POST","PUT","DELETE"], "Bodeguero": ["PUT"], "Cajero": ["PUT"]},
     "Productos": {"Administrador": "ALL", "Bodeguero": "ALL", "Cajero": ["GET"]},
-    "Inventario": {"Administrador": ["ALL","GET","POST","PUT","DELETE"], "Bodeguero": ["GET","POST","PUT"], "Cajero": ["GET"]},
+    "Inventario": {"Administrador": ["ALL","GET","POST","PUT","DELETE"], "Bodeguero": ["ALL","GET","POST","PUT","DELETE"], "Cajero": ["GET"]},
     "Pedido": {"Administrador": ["ALL","GET","POST","PUT","DELETE"], "Bodeguero": ["ALL","GET","POST","PUT","DELETE"], "Cajero": []},
     "Promocion": {"Administrador": ["ALL","GET","POST","PUT","DELETE"], "Bodeguero": [], "Cajero": ["GET"]},
     "Venta": {"Administrador": ["ALL","GET","POST","PUT","DELETE"], "Bodeguero": [], "Cajero": ["ALL","GET","POST","PUT","DELETE"]},
