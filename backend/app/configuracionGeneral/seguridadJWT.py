@@ -41,7 +41,7 @@ oauth2Scheme = OAuth2PasswordBearer(tokenUrl="/usuarios/loginSwagger",auto_error
 #Validador de token y permisos según el rol
 permisos = {
     "Prueba": {"Administrador": "ALL", "Bodeguero": "ALL", "Cajero": "ALL"},
-    "ParametrosSistema": {"Administrador": "ALL", "Bodeguero": [], "Cajero": []},
+    "ParametrosSistema": {"Administrador": ["ALL","GET","POST","PUT","DELETE"], "Bodeguero": ["GET"], "Cajero": ["GET"]},
     "Usuarios": {"Administrador": ["ALL","GET","POST","PUT","DELETE"], "Bodeguero": ["PUT"], "Cajero": ["PUT"]},
     "Productos": {"Administrador": "ALL", "Bodeguero": "ALL", "Cajero": ["GET"]},
     "Inventario": {"Administrador": ["ALL","GET","POST","PUT","DELETE"], "Bodeguero": ["GET","POST","PUT"], "Cajero": ["GET"]},
